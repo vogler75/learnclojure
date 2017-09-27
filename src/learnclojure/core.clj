@@ -28,17 +28,16 @@
 
 (defn layer-delta-calculation [neurons deltas weights]
   (let [n (mapv dactivation-fn neurons)
-        d (reduce + (flatten (matrix/mmul deltas weights)))]
-    (println neurons)
-    (println weights)
-    (println deltas)
-    (println n)
-    (println d)
-    (mapv #(* % d) n)))
+        d (flatten (matrix/mmul deltas weights))]
+    (mapv * n d)))
 
-;  (matrix/mmul
-;    (matrix (mapv dactivation-fn neurons))
-;    (vector (mapv #(reduce + %) (matrix/mmul weights deltas)))))
+(defn update-weights-calculation [neurons deltas weights learning-rate]
+  (let [n (matrix/mmul neurons deltas)]
+    (println "n=" n)
+    (println "w=" weights)
+    (+ (flatten n) (map #(* learning-rate %) (flatten weights)))))
+
+; (+ strengths (* lrate (mapv #(* deltas %) neurons))))
 
 ;------------------------------------------------------------------------------------------
 (def input-neurons [1 0])
@@ -52,10 +51,14 @@
 
 (def targets [0 1])
 
+(def learning-rate 0.1)
+;------------------------------------------------------------------------------------------
+
 (def hidden-neurons (layer-calculation (matrix input-neurons) input-hidden-weights))
 (def output-neurons (layer-calculation hidden-neurons hidden-output-weights))
 (def output-deltas (output-delta-calculation (flatten output-neurons) targets))
 (def hidden-deltas (layer-delta-calculation (flatten hidden-neurons) (vector output-deltas) hidden-output-weights))
+(def new-hidden-output-weights (update-weights-calculation hidden-neurons (vector hidden-deltas) hidden-output-weights learning-rate))
 
 output-neurons
 ;=> [[0.02315019005321053]
@@ -72,5 +75,11 @@ output-deltas
 hidden-deltas
 ;=> [0.14982559238071416 0.027569216735265096 0.018880751432503236]
 
-(def d1 (vector output-deltas))
-(reduce + (flatten (matrix/mmul d1 hidden-output-weights)))
+new-hidden-output-weights
+
+(def deltas (vector output-deltas))
+(def weights hidden-output-weights)
+(def neurons (flatten hidden-neurons))
+
+
+
