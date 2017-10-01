@@ -1,4 +1,4 @@
-(ns learnclojure.core
+(ns learnclojure.neuronal
   (:import [java.util Date Calendar])
   (:require [clojure.core.async :refer [chan go go-loop >! <!] :as async]
             [learnclojure.matrix :as matrix]))
